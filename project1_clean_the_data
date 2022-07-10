@@ -69,6 +69,19 @@ where UniqueID in  ( select * from  ( select *, row_number() over (
 				) as rownum
                 FROM  portfolio.nhdd_5)  as derived
                 where  rownum > 1)
+		
+		
+		
+		
+		
+		
+		
+/* portfolio.nhdd2 is the final cleaned data set */
+
+select * from portfolio.nhdd_5
+
+
+
                
           
                 
