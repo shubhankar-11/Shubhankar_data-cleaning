@@ -8,3 +8,72 @@ lines terminated by '\n'
 ignore 1 rows;
 
 
+
+/* Breaking out Address into Individual Columns (Address, City, State) */
+
+select substring(PropertyAddress,1,position(',' in PropertyAddress)-1) , substring(PropertyAddress,position(',' in PropertyAddress)+1) 
+from portfolio.nhdd 
+
+
+select substring_index(OwnerAddress,',',1), substring_index(substring_index(OwnerAddress,',',2),',',-1) , substring_index(OwnerAddress,',',-1)
+from portfolio.nhdd 
+
+update portfolio.nhdd
+set OwnersplitAddress = substring_index(OwnerAddress,',',1)
+update portfolio.nhdd
+set Ownersplitcity=  substring_index(substring_index(OwnerAddress,',',2),',',-1)
+update portfolio.nhdd
+set Ownersplitstate= substring_index(substring_index(OwnerAddress,',',2),',',-1)
+
+
+/* Remove Duplicates */
+
+
+With RownumCTE as (
+select *, row_number() over ( 
+			Partition by ParceLID, PropertyAddress,
+				 SalePrice,
+				 SaleDate,
+				 LegalReference
+				) as rownum
+                FROM  nhdd_eg )
+                select *  from RownumCTE where rownum > 1
+                
+  delete from (select *, row_number() over ( 
+			Partition by ParceLID, PropertyAddress,
+				 SalePrice,
+				 SaleDate,
+				 LegalReference
+				) as rownum
+                FROM  portfolio.nhdd2)
+                where rownum > 1
+                
+       select * from  ( select *, row_number() over ( 
+			Partition by ParceLID, PropertyAddress,
+				 SalePrice,
+				 SaleDate,
+				 LegalReference
+				) as rownum
+                FROM  portfolio.nhdd_5)  as derived
+                where  rownum > 1
+                
+
+
+#duplicate rows deleted from portfolio.nhdd_5
+delete from portfolio.nhdd_5
+where UniqueID in  ( select * from  ( select *, row_number() over ( 
+			Partition by ParcelID, PropertyAddress,
+				 SalePrice,
+				 SaleDate,
+				 LegalReference
+				) as rownum
+                FROM  portfolio.nhdd_5)  as derived
+                where  rownum > 1)
+               
+          
+                
+                
+
+
+
+
