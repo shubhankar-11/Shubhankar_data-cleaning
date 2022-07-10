@@ -1,0 +1,10 @@
+/* Loading CSV file into MySQL */
+
+LOAD DATA INFILE 'C:/ProgramData/MySQL/MySQL Server 8.0/Uploads/alex_2_project/nhdd.csv'
+INTO TABLE portfolio.nhdd
+fields terminated by ','
+enclosed by '"'
+lines terminated by '\n'
+ignore 1 rows;
+
+
