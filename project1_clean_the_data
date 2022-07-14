@@ -9,12 +9,26 @@ ignore 1 rows;
 
 
 
+update  portfolio.nhdd
+set PropertyAddress = null where PropertyAddress = ''
+
+#null done
+select *
+from portfolio.nhdd
+where PropertyAddress is null
+
+
+
+
 /* Breaking out Address into Individual Columns (Address, City, State) */
 
+#address commas remove
+
 select substring(PropertyAddress,1,position(',' in PropertyAddress)-1) , substring(PropertyAddress,position(',' in PropertyAddress)+1) 
-from portfolio.nhdd 
+from portfolio.nhdd
 
 
+#split owner addres
 select substring_index(OwnerAddress,',',1), substring_index(substring_index(OwnerAddress,',',2),',',-1) , substring_index(OwnerAddress,',',-1)
 from portfolio.nhdd 
 
@@ -27,66 +41,28 @@ set Ownersplitstate= substring_index(substring_index(OwnerAddress,',',2),',',-1)
 
 
 /* Remove Duplicates */
-
-
-With RownumCTE as (
-select *, row_number() over ( 
-			Partition by ParceLID, PropertyAddress,
-				 SalePrice,
-				 SaleDate,
-				 LegalReference
-				) as rownum
-                FROM  nhdd_eg )
-                select *  from RownumCTE where rownum > 1
-                
-  delete from (select *, row_number() over ( 
-			Partition by ParceLID, PropertyAddress,
-				 SalePrice,
-				 SaleDate,
-				 LegalReference
-				) as rownum
-                FROM  portfolio.nhdd2)
-                where rownum > 1
-                
-       select * from  ( select *, row_number() over ( 
-			Partition by ParceLID, PropertyAddress,
-				 SalePrice,
-				 SaleDate,
-				 LegalReference
-				) as rownum
-                FROM  portfolio.nhdd_5)  as derived
-                where  rownum > 1
                 
 
 
-#duplicate rows deleted from portfolio.nhdd_5
-delete from portfolio.nhdd_5
-where UniqueID in  ( select * from  ( select *, row_number() over ( 
+#duplicate rows deleted from portfolio.nhdd2
+delete from portfolio.nhdd2
+where UniqueID in  ( select UniqueID from  ( select *, row_number() over ( 
 			Partition by ParcelID, PropertyAddress,
 				 SalePrice,
 				 SaleDate,
 				 LegalReference
 				) as rownum
-                FROM  portfolio.nhdd_5)  as derived
+                FROM  portfolio.nhdd2)  as derived
                 where  rownum > 1)
 		
 		
 		
 		
 		
-		
-		
-/* portfolio.nhdd2 is the final cleaned data set */
+/* portfolio.nhdd_5 is the final cleaned data set */
 
 select * from portfolio.nhdd_5
 
 
 
-               
-          
-                
-                
-
-
-
-
+      
